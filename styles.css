@@ -1,0 +1,17 @@
+<div id="leaderboard" class="mt-4 p-4 bg-gray-800 rounded">
+    <h2 class="text-xl font-bold mb-2">Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+</div>
+
+<script>
+    socket.on('leaderboardUpdate', (leaderboard) => {
+        const leaderboardList = document.getElementById('leaderboardList');
+        leaderboardList.innerHTML = '';
+
+        Object.entries(leaderboard).forEach(([player, winnings]) => {
+            const li = document.createElement('li');
+            li.textContent = `${player}: $${winnings.toFixed(2)}`;
+            leaderboardList.appendChild(li);
+        });
+    });
+</script>

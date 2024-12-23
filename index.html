@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Crash Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Aviator Crash Game</h1>
+        <canvas id="chart"></canvas>
+        <div class="mt-4">
+            <input type="number" id="betAmount" placeholder="Bet Amount" class="p-2 bg-gray-800 rounded">
+            <button id="placeBet" class="p-2 bg-green-600 rounded">Place Bet</button>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('chart').getContext('2d');
+        const socket = io();
+        const multiplierData = [];
+        const labels = [];
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Multiplier',
+                    data: multiplierData,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            }
+        });
+
+        socket.on('updateMultiplier', (multiplier) => {
+            labels.push('');
+            multiplierData.push(multiplier);
+            chart.update();
+        });
+
+        socket.on('crash', (finalMultiplier) => {
+            alert(`Crashed at ${finalMultiplier}!`);
+            labels.length = 0;
+            multiplierData.length = 0;
+            chart.update();
+        });
+
+        document.getElementById('placeBet').addEventListener('click', () => {
+            const amount = parseFloat(document.getElementById('betAmount').value);
+            const cashoutMultiplier = prompt('Enter cashout multiplier:');
+            socket.emit('placeBet', { amount, cashoutMultiplier });
+        });
+        <div id="leaderboard" class="mt-4 p-4 bg-gray-800 rounded">
+    <h2 class="text-xl font-bold mb-2">Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+    <script>
+    socket.on('leaderboardUpdate', (leaderboard) => {
+        const leaderboardList = document.getElementById('leaderboardList');
+        leaderboardList.innerHTML = '';
+
+        Object.entries(leaderboard).forEach(([player, winnings]) => {
+            const li = document.createElement('li');
+            li.textContent = `${player}: $${winnings.toFixed(2)}`;
+            leaderboardList.appendChild(li);
+        });
+    });
+    </script>
+</div>
+
+<script>
+    
+    socket.on('leaderboardUpdate', (leaderboard) => {
+        const leaderboardList = document.getElementById('leaderboardList');
+        leaderboardList.innerHTML = '';
+
+        Object.entries(leaderboard).forEach(([player, winnings]) => {
+            const li = document.createElement('li');
+            li.textContent = `${player}: $${winnings.toFixed(2)}`;
+            leaderboardList.appendChild(li);
+        });
+    });
+    </script>
+</body>
+</html>
